@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>أذكار الصباح</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Cairo:wght@400;700&display=swap');
+
+/* Ticker / Faith Bar */
+.faith-bar {
+    background: #222;
+    color: #fff;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    box-shadow: 0 0 10px #444;
+}
+
+/* Fade-In effect */
+.fade-text {
+    opacity: 0;
+    transition: opacity 1.2s ease-in-out;
+}
+.fade-text.show {
+    opacity: 1;
+}
+
+/* Snowflakes */
+.snowflake-soft {
+    position: fixed;
+    top: -10px;
+    background: white;
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(0.5px);
+    animation: softFall linear forwards;
+}
+@keyframes softFall {
+    to {
+        transform: translateY(100vh);
+    }
+}
+
+/* باقي تنسيق الصفحة */
+body {
+    font-family: 'Cairo', sans-serif;
+    background: linear-gradient(to bottom, #e3f2fd, #bbdefb);
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+header {
+    background: #1565c0;
+    color: white;
+    padding: 15px;
+    font-size: 22px;
+    font-weight: bold;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+.container {
+    padding: 25px;
+    max-width: 900px;
+    margin: auto;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 0 12px rgba(0,0,0,0.15);
+    min-height: 400px;
+}
+.zekr {
+    font-size: 18px;
+    margin: 20px 0;
+    line-height: 1.8;
+    background: #f1f8e9;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    position: relative;
+    text-align: right;
+}
+button {
+    background-color: #43a047;
+    color: white;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+button:hover { background-color: #2e7d32; }
+.count {
+    font-size: 18px;
+    color: #1b5e20;
+    margin-top: 5px;
+    font-weight: bold;
+}
+.completed { color: green; font-weight: bold; margin-left: 10px; }
+.c-section { margin-top: 30px; text-align: center; }
+</style>
+
+
+</head>
+<body>
+
+<header>🌙 أذكار الصباح 🌙</header>
+
+<!-- ⭐ شريط الإيمان -->
+<div class="faith-bar">
+    <div id="faithText" class="fade-text"></div>
+</div>
+
+<div class="container" id="zekrContainer"></div>
+
+<audio id="audioPlayer" controls autoplay loop style="margin-top:20px;">
+    <source src="ahmed_almujidi_quran.mp3" type="audio/mpeg">
+    <source src="rain_sound.mp3" type="audio/mpeg">
+    المتصفح لا يدعم تشغيل الصوت.
+</audio>
+
+<section class="c-section" id="tadabbur">
+  <h2>🌿 تدبّر وتذكّر</h2>
+  <p id="tadabburText">"للذين أحسنوا الحسنى وزيادة" – يونس 26</p>
+</section>
+
+<section class="c-section" id="duaa">
+  <h2>🤲 دعاء اليوم</h2>
+  <p id="duaaText">اللهم اجعل القرآن ربيع قلوبنا ونور صدورنا 🌸</p>
+</section>
+
+<section class="c-section" id="hadith">
+  <h2>📜 حديث اليوم</h2>
+  <p id="hadithText">"إنما الأعمال بالنيات، وإنما لكل امرئ ما نوى" – رواه البخاري</p>
+</section>
+
+<section class="c-section" id="kalima">
+  <h2>🌼 كلمة طيبة اليوم</h2>
+  <p id="kalimaText">ابتسامتك صدقة 🌸</p>
+</section>
+
+<section class="c-section" id="quran-fact">
+  <h2>📖 فائدة قرآنية</h2>
+  <p id="quranFactText">قال تعالى: 'ومن يؤمن بالله يهد قلبه' — دلالة على أن الإيمان طريق الطمأنينة 🌿</p>
+</section>
+
+<script>
+// ====== جميع الأذكار ======
+const allZekr = [
+  { text: "آية الكرسي: الله لا إله إلا هو الحي القيوم...", count: 1 },
+  { text: "سورة الفاتحة: الحمد لله رب العالمين ...", count: 3 },
+  { text: "سورة الإخلاص: قل هو الله أحد ...", count: 3 },
+  { text: "سورة الفلق: قل أعوذ برب الفلق ...", count: 3 },
+  { text: "سورة الناس: قل أعوذ برب الناس ...", count: 3 },
+  { text: "اللّهـمَّ أَنْتَ رَبِّـي لا إلهَ إلاّ أَنْتَ ...", count: 1 },
+  { text: "أصبحنا على فطرة الإسلام وعلى كلمة الإخلاص ...", count :3 },
+  { text: "وقال : ( إذا أصبح أحدكم، فليقل : أصبحنا وأصبح الملك لله ...",count: 3 },
+  { text: "اللهم إني أسألك علماً نافعاً ورزقاً طيباً وعمل متقبلاً...", count: 3 },
+  { text: "اللهم إني أصبحت أشهد ك و أشهد حملة عرشك ...",count:4},
+  { text: " اللهم عالم الغيب و الشهادة فاطر السموات و الأرض، رب كل شئ و مليكه، أشهد أن لا إله إلا أنت، أعوذ بك من شر نفسي، و من شر الشيطان و شركه، و أن أقترف على نفسي سوءا، أو أجره إلى مسلم ", count: 1 },
+  { text: "رضيت بالله ربا، و بالإسلام دينا، و بمحمد صلى الله عليه و سلم نبيا ...", count: 3} ,
+  { text: "يا حي يا قيوم برحمتك أستغيث أصلح لي شأني كله ...", count: 1 },
+  { text: "وقال له أبو بكر الصديق رضي الله عنه : مرني بكلمات أقولهن ...", count: 1 },
+  { text: "من قال حين يصبح اللهم ما أصبح بي من نعمة ...", count: 1 },
+   { text:  " لا إله إلا الله وحده لا شريك له، له الملك و له الحمد، وهو على كل شئ قدير - (عشر مرات) أو (مرة واحدة عند الكسل) ",count:10},
+    { text: " اللهم عافني في بدني، اللهم عافني في سمعي، اللهم عافني في بصري، لا إله إلا أنت . اللهم إني أعوذ بك من الكفر، و الفقر، و أعوذ بك من عذاب القبر، لا إله إلا أنت - (ثلاث مرات) ",count:3},
+  { text: "حسبي الله لا إله إلا هو عليه توكلت و هو رب العرش العظيم ...",count: 7},
+  { text: "من قال حين يصبح وحين يمسي : رضيت بالله ربا ...", count: 3 },
+  { text: "بِسْمِ اللَّهِ الَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْء...", count: 3 },
+  { text: "سبحان الله وبحمده مائة مرة...", count: 100 },
+    { text: " سبحان الله و بحمده : عدد خلقه، و رضا نفسه، و زنة عرشه، و مداد كلماته - (ثلاث مرات أذا أصبح) ",count:3}
+];
+
+function displayAllZekr() {
+  const container = document.getElementById("zekrContainer");
+  container.innerHTML = "";
+  allZekr.forEach((zekr, i) => {
+    const div = document.createElement("div");
+    div.className = "zekr";
+    div.innerHTML = `
+    <button onclick="resetCount(${i}, this)">Reset</button>
+      <p>${zekr.text}</p>
+      <button onclick="increaseCount(${i}, this)">تسبيح</button>
+      <span class="count" id="count${i}">0</span>
+      <span class="completed" id="completed${i}"></span>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function increaseCount(index, btn) {
+  const countElement = document.getElementById("count" + index);
+  const completedElement = document.getElementById("completed" + index);
+  let current = parseInt(countElement.innerText);
+  current++;
+  countElement.innerText = current;
+  if(current >= allZekr[index].count) {
+    btn.innerText = "لقد أتممت الذكر";
+    completedElement.innerText = "✅";
+  }
+}
+
+displayAllZekr();
+
+// ====== نصوص متغيرة للشريط مع Fade-In ======
+const faithMessages = [
+    "﴿ أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ ﴾",
+    "قال ﷺ: «إن الإيمان ليَخلَق في جوف أحدكم كما يَخلَق الثوب… فاسألوا الله أن يجدده في قلوبكم»",
+    "الصبر مفتاح اليقين، ومن يتصبر يصبره الله",
+    "من علامات صدق الإيمان: كثرة الطاعة وترك المعصية",
+    "قال ابن مسعود: اليقين الإيمان كله",
+    "نور الطاعة يملأ القلب… وظلمة المعصية تطفئه",
+    "ابدأ عمل خير الآن ولو صغيرًا… فالقلوب تُفتح بالطاعة",
+    "الإيمان يزيد بالطاعة وينقص بالمعصية",
+    "من أحب القرآن أحب الله وأكثر من ذكره",
+    "إذا أردت أن يشرح الله صدرك فأكثِر من قول: لا حول ولا قوة إلا بالله"
+];
+
+let index = 0;
+function rotateFaithText() {
+    const el = document.getElementById("faithText");
+    el.classList.remove("show");
+    setTimeout(() => {
+        el.innerText = faithMessages[index];
+        el.classList.add("show");
+        index = (index + 1) % faithMessages.length;
+    }, 200);
+}
+rotateFaithText();
+setInterval(rotateFaithText, 10000);
+
+// ====== Snow Effect ======
+function createSnow() {
+    const snow = document.createElement("div");
+    snow.className = "snowflake-soft";
+    snow.style.left = Math.random() * window.innerWidth + "px";
+    const size = 2 + Math.random() * 10;
+    snow.style.width = size + "px";
+    snow.style.height = size + "px";
+    snow.style.animationDuration = (4 + Math.random() * 4) + "s";
+    snow.style.opacity = 0.1 + Math.random() * 0.4;
+    document.body.appendChild(snow);
+    setTimeout(() => snow.remove(), 8000);
+}
+setInterval(createSnow, 200);
+
+// ====== تدبّر / دعاء / حديث / كلمة / فائدة ======
+const tadabburTexts = [
+  '"للذين أحسنوا الحسنى وزيادة" – يونس 26',
+  '"ومن يؤمن بالله يهد قلبه" – التغابن 11',
+  '"إن الله مع الذين اتقوا والذين هم محسنون" – النحل 128',
+  '"ومن يتوكل على الله فهو حسبه" – الطلاق 3',
+  '"هيا بنا نؤمن ساعة" – عن عبدالله بن رواحة رضي الله عنه'
+];
+const duaas = [
+  "اللهم اجعل القرآن ربيع قلوبنا ونور صدورنا",
+  "اللهم ارزقنا يقينًا لا يتزعزع وصبرًا لا ينفد",
+  "اللهم قوِّ إيماننا واملأ قلوبنا بنورك",
+  "اللهم اجعلنا من الذين يستمعون القول فيتبعون أحسنه"
+];
+const hadiths = [
+  '"إنما الأعمال بالنيات، وإنما لكل امرئ ما نوى" – رواه البخاري',
+  '"لا يؤمن أحدكم حتى يحب لأخيه ما يحب لنفسه" – متفق عليه',
+  '"الدين النصيحة" – رواه مسلم',
+  '"من سلك طريقًا يلتمس فيه علمًا سهّل الله له به طريقًا إلى الجنة" – حديث شريف'
+];
+const kalimat = [
+  "ابتسامتك صدقة",
+  "القلب إذا صفا رأى النور",
+  "ارفع همّتك، فالله لا يضيع من أحسن العمل",
+  "كُن مع الله ولا تبالِ",
+  "النية الطيبة تصنع المعجزات"
+];
+const quranFacts = [
+  "قال تعالى: 'ومن يؤمن بالله يهد قلبه' — دلالة على أن الإيمان طريق الطمأنينة",
+  "آية الكرسي عظيمة لأنها تجمع بين التوحيد والقدرة الإلهية",
+  "قال تعالى: 'إن الله لا يغير ما بقوم حتى يغيروا ما بأنفسهم' — سر الإصلاح الداخلي",
+  "سورة الفاتحة تسمى أم الكتاب لأنها جمعت معاني القرآن"
+];
+
+function rotateText(el, arr, interval){
+  let idx = 0;
+  setInterval(()=> {
+    idx = (idx + 1) % arr.length;
+    el.style.opacity = 0;
+    setTimeout(()=> { el.textContent = arr[idx]; el.style.opacity = 1; }, 400);
+  }, interval);
+}
+rotateText(document.getElementById('tadabburText'), tadabburTexts, 10000);
+rotateText(document.getElementById('duaaText'), duaas, 12000);
+rotateText(document.getElementById('hadithText'), hadiths, 15000);
+rotateText(document.getElementById('kalimaText'), kalimat, 8000);
+rotateText(document.getElementById('quranFactText'), quranFacts, 12000);
+function resetCount(index, btn) {
+    const countElement = document.getElementById("count" + index);
+    const completedElement = document.getElementById("completed" + index);
+    const zekrButton = btn.previousElementSibling; // زر "تسبيح"
+    countElement.innerText = "0";
+    completedElement.innerText = "";
+    zekrButton.innerText = "تسبيح";
+}
+
+</script>
+
+</body>
+</html>
